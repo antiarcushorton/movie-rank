@@ -69,13 +69,18 @@ function validState(value) {
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
+
     if (raw) {
       const parsed = JSON.parse(raw);
+
       if (validState(parsed)) {
         return {
           movies: parsed.movies,
           history: parsed.history,
-          currentPair: parsed.currentPair || null
+          currentPair: parsed.currentPair || null,
+          started: parsed.started !== false,
+          selectedTitles: parsed.selectedTitles ||
+            parsed.movies.map(movie => movie.title)
         };
       }
     }
@@ -86,13 +91,17 @@ function loadState() {
   return {
     movies: newMovies(),
     history: [],
-    currentPair: null
+    currentPair: null,
+    started: false,
+    selectedTitles: [...DEFAULT_TITLES]
   };
 }
 
 let state = loadState();
 let activeTab = "vote";
 let toastTimer;
+let selectionOpen = !state.started;
+let draftSelection = new Set(state.selectedTitles);
 
 function saveState() {
   try {
@@ -256,6 +265,73 @@ function escapeHTML(value) {
   })[character]);
 }
 
+function renderSelection() {
+  const query = $("#selection-search").value.trim().toLowerCase();
+  const selected = draftSelection.size;
+
+  $("#selection-count").textContent =
+    `${selected} of ${DEFAULT_TITLES.length} selected`;
+
+  $("#selection-hint").textContent = selected < 2
+    ? "Select at least two movies to begin."
+    : `${selected} movies ready to rank.`;
+
+  $("#start-ranking-button").disabled = selected < 2;
+
+  $("#movie-selection-list").innerHTML = DEFAULT_TITLES
+    .filter(title => title.toLowerCase().includes(query))
+    .map(title => `
+      <label class="movie-selection-item">
+        <input
+          type="checkbox"
+          data-movie-title="${escapeHTML(title)}"
+          ${draftSelection.has(title) ? "checked" : ""}
+        >
+        <span>${escapeHTML(title)}</span>
+      </label>
+    `).join("");
+}
+
+function openMovieSelection() {
+  draftSelection = new Set(state.selectedTitles);
+  selectionOpen = true;
+  $("#selection-search").value = "";
+  render();
+}
+
+function startRanking() {
+  if (draftSelection.size < 2) {
+    showToast("Select at least two movies.");
+    return;
+  }
+
+  if (state.started && state.history.length > 0) {
+    const confirmed = window.confirm(
+      "Starting a new ranking will reset the current ELO ratings " +
+      "and comparison history. Continue?"
+    );
+
+    if (!confirmed) return;
+  }
+
+  state.selectedTitles = DEFAULT_TITLES.filter(title =>
+    draftSelection.has(title)
+  );
+
+  state.movies = newMovies(state.selectedTitles);
+  state.history = [];
+  state.currentPair = null;
+  state.started = true;
+  state.currentPair = chooseNextPair();
+
+  selectionOpen = false;
+  activeTab = "vote";
+
+  saveState();
+  render();
+  showToast("Your new movie ranking is ready!");
+}
+
 function formatDate(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
@@ -338,13 +414,30 @@ function renderHistory() {
 }
 
 function render() {
+  renderSelection();
   renderMatchup();
   renderRankings();
   renderHistory();
 
-  $("#vote-panel").classList.toggle("hidden", activeTab !== "vote");
-  $("#rankings-panel").classList.toggle("hidden", activeTab !== "rankings");
-  $("#history-panel").classList.toggle("hidden", activeTab !== "history");
+  $("#selection-panel").classList.toggle(
+    "hidden", !selectionOpen
+  );
+
+  document.querySelector(".tabs").classList.toggle(
+    "hidden", selectionOpen
+  );
+
+  $("#vote-panel").classList.toggle(
+    "hidden", selectionOpen || activeTab !== "vote"
+  );
+
+  $("#rankings-panel").classList.toggle(
+    "hidden", selectionOpen || activeTab !== "rankings"
+  );
+
+  $("#history-panel").classList.toggle(
+    "hidden", selectionOpen || activeTab !== "history"
+  );
 
   document.querySelectorAll("[data-tab]").forEach(button => {
     const active = button.dataset.tab === activeTab;
@@ -419,9 +512,11 @@ function resetRankings() {
   if (!confirmed) return;
 
   state = {
-    movies: newMovies(state.movies.map(movie => movie.title)),
+    movies: newMovies(state.selectedTitles),
     history: [],
-    currentPair: null
+    currentPair: null,
+    started: true,
+    selectedTitles: [...state.selectedTitles]
   };
   state.currentPair = chooseNextPair();
   saveState();
@@ -461,6 +556,36 @@ $("#export-ranking-button-2").addEventListener("click", exportRankings);
 $("#export-history-button").addEventListener("click", exportHistory);
 $("#reset-button").addEventListener("click", resetRankings);
 $("#search-input").addEventListener("input", renderRankings);
+
+$("#selection-search").addEventListener("input", renderSelection);
+
+$("#movie-selection-list").addEventListener("change", event => {
+  const checkbox = event.target.closest('input[type="checkbox"]');
+  if (!checkbox) return;
+
+  const title = checkbox.dataset.movieTitle;
+
+  if (checkbox.checked) {
+    draftSelection.add(title);
+  } else {
+    draftSelection.delete(title);
+  }
+
+  renderSelection();
+});
+
+$("#select-all-button").addEventListener("click", () => {
+  draftSelection = new Set(DEFAULT_TITLES);
+  renderSelection();
+});
+
+$("#clear-selection-button").addEventListener("click", () => {
+  draftSelection.clear();
+  renderSelection();
+});
+
+$("#start-ranking-button").addEventListener("click", startRanking);
+$("#change-selection-button").addEventListener("click", openMovieSelection);
 
 // Keep a newly generated pair saved, even before the first vote.
 ensureCurrentPair();

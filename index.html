@@ -28,6 +28,56 @@
       </p>
     </section>
 
+    <section class="panel" id="selection-panel">
+        <div class="section-heading">
+            <div>
+            <p class="eyebrow">MAKE IT YOURS</p>
+            <h2>Choose your movies</h2>
+            <p class="muted">
+                Select the movies you want to compare. You can choose as
+                many or as few as you like.
+            </p>
+            </div>
+            <span class="count-pill" id="selection-count">
+            0 selected
+            </span>
+        </div>
+
+        <div class="selection-tools">
+            <input
+            id="selection-search"
+            type="search"
+            placeholder="Find a movie…"
+            aria-label="Search movies to select"
+            autocomplete="off"
+            />
+            <div class="selection-actions">
+            <button class="text-button" id="select-all-button" type="button">
+                Select all
+            </button>
+            <button class="text-button" id="clear-selection-button" type="button">
+                Clear selection
+            </button>
+            </div>
+        </div>
+
+        <div id="movie-selection-list" class="movie-selection-list"></div>
+
+        <div class="selection-footer">
+            <p class="muted" id="selection-hint">
+            Select at least two movies to begin.
+            </p>
+            <button
+            class="primary-button"
+            id="start-ranking-button"
+            type="button"
+            disabled
+            >
+            Start ranking →
+            </button>
+        </div>
+    </section>
+
     <nav class="tabs" aria-label="Main navigation">
       <button class="tab active" data-tab="vote">Compare</button>
       <button class="tab" data-tab="rankings">Rankings</button>
@@ -85,6 +135,9 @@
         </button>
         <button class="secondary-button" id="export-ranking-button">
           ↓ Export rankings
+        </button>
+        <button class="secondary-button" id="change-selection-button">
+          Change movie selection
         </button>
       </div>
     </section>
