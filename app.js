@@ -557,7 +557,9 @@ $("#export-history-button").addEventListener("click", exportHistory);
 $("#reset-button").addEventListener("click", resetRankings);
 $("#search-input").addEventListener("input", renderRankings);
 
-$("#selection-search").addEventListener("input", renderSelection);
+$("#selection-search").addEventListener("input", () => {
+  renderSelection();
+});
 
 $("#movie-selection-list").addEventListener("change", event => {
   const checkbox = event.target.closest('input[type="checkbox"]');
