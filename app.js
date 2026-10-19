@@ -78,7 +78,7 @@ function loadState() {
           movies: parsed.movies,
           history: parsed.history,
           currentPair: parsed.currentPair || null,
-          started: parsed.started !== false,
+          started: parsed.started === true && Array.isArray(parsed.selectedTitles),
           selectedTitles: parsed.selectedTitles ||
             parsed.movies.map(movie => movie.title)
         };
@@ -587,7 +587,9 @@ $("#clear-selection-button").addEventListener("click", () => {
 $("#start-ranking-button").addEventListener("click", startRanking);
 $("#change-selection-button").addEventListener("click", openMovieSelection);
 
-// Keep a newly generated pair saved, even before the first vote.
-ensureCurrentPair();
-saveState();
+// Only initialize a matchup after the user starts ranking.
+if (state.started) {
+  ensureCurrentPair();
+}
+
 render();
