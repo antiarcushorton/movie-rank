@@ -1,0 +1,162 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7f5">
+  <title>Movie Rankings</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Movie Rankings home">
+      <span class="brand-icon">M</span>
+      <span>Movie Rankings</span>
+    </a>
+    <span class="save-status" id="save-status">Saved locally</span>
+  </header>
+
+  <main class="container">
+    <section class="intro">
+      <p class="eyebrow">YOUR PERSONAL MOVIE LIST</p>
+      <h1>What’s your favorite?</h1>
+      <p class="subtitle">
+        Pick between two movies. Your choices build a ranking
+        that reflects your taste.
+      </p>
+    </section>
+
+    <nav class="tabs" aria-label="Main navigation">
+      <button class="tab active" data-tab="vote">Compare</button>
+      <button class="tab" data-tab="rankings">Rankings</button>
+      <button class="tab" data-tab="history">History</button>
+    </nav>
+
+    <section class="panel" id="vote-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">HEAD TO HEAD</p>
+          <h2>Which would you rather watch?</h2>
+        </div>
+        <span class="count-pill" id="vote-count">0 comparisons</span>
+      </div>
+
+      <div class="matchup" id="matchup">
+        <button class="movie-card" data-action="choose" data-side="left">
+          <span class="movie-number">OPTION 01</span>
+          <span class="movie-title" id="left-title">Loading…</span>
+          <span class="pick-label">I'd pick this one <span aria-hidden="true">↗</span></span>
+        </button>
+
+        <div class="versus" aria-hidden="true">OR</div>
+
+        <button class="movie-card" data-action="choose" data-side="right">
+          <span class="movie-number">OPTION 02</span>
+          <span class="movie-title" id="right-title">Loading…</span>
+          <span class="pick-label">I'd pick this one <span aria-hidden="true">↗</span></span>
+        </button>
+      </div>
+
+      <div class="matchup-footer">
+        <p id="matchup-hint">No wrong answers. Go with your gut.</p>
+        <button class="text-button" id="skip-button">Skip this pair →</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-label">MOVIES</span>
+          <strong id="movie-count">34</strong>
+        </div>
+        <div class="stat">
+          <span class="stat-label">COMPARISONS</span>
+          <strong id="total-votes">0</strong>
+        </div>
+        <div class="stat">
+          <span class="stat-label">MOST COMPARED</span>
+          <strong id="most-compared">—</strong>
+        </div>
+      </div>
+
+      <div class="utility-row">
+        <button class="secondary-button" id="undo-button" disabled>
+          ↶ Undo last vote
+        </button>
+        <button class="secondary-button" id="export-ranking-button">
+          ↓ Export rankings
+        </button>
+      </div>
+    </section>
+
+    <section class="panel hidden" id="rankings-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">YOUR LEADERBOARD</p>
+          <h2>All movies, ranked</h2>
+          <p class="muted">Rankings update with every choice.</p>
+        </div>
+        <button class="secondary-button" id="export-ranking-button-2">
+          ↓ Export CSV
+        </button>
+      </div>
+
+      <label class="search-box">
+        <span aria-hidden="true">⌕</span>
+        <input id="search-input" type="search"
+          placeholder="Find a movie…" autocomplete="off">
+      </label>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="rank-col">#</th>
+              <th>Movie</th>
+              <th class="numeric">Rating</th>
+              <th class="numeric">Matchups</th>
+            </tr>
+          </thead>
+          <tbody id="ranking-rows"></tbody>
+        </table>
+      </div>
+      <p class="muted small" id="ranking-note">
+        All movies start at the same rating. Early rankings may change quickly.
+      </p>
+    </section>
+
+    <section class="panel hidden" id="history-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">YOUR DECISIONS</p>
+          <h2>Match history</h2>
+          <p class="muted">Every choice that shaped your ranking.</p>
+        </div>
+        <button class="secondary-button" id="export-history-button">
+          ↓ Export CSV
+        </button>
+      </div>
+      <div id="history-list"></div>
+      <p class="empty-state hidden" id="empty-history">
+        Your voting history will appear here after your first comparison.
+      </p>
+    </section>
+
+    <section class="bottom-tools">
+      <div>
+        <strong>Your list, your rules.</strong>
+        <p>Progress is saved in this browser. No account needed.</p>
+      </div>
+      <button class="text-button danger" id="reset-button">
+        Reset rankings
+      </button>
+    </section>
+
+    <footer>
+      <p>Made for movie lovers. Rankings powered by Elo.</p>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
